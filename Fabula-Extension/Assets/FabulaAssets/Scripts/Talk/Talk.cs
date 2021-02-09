@@ -1,12 +1,23 @@
 ﻿using System;
+using UnityEngine;
+//======JSON VALUES=======================
 
-public struct Talk
+[Serializable]
+public class Talk
 {
     public string Speaker;
     public string Speak;
 }
-
-public struct JsonValue
+//Talk json structure
+[Serializable]
+public class JsonValues
 {
-    public Talk json;
+    public Talk[] Talk;
+
+    //return the talk object
+    public static JsonValues CreateFromJSON(string _data)
+    {
+        return JsonUtility.FromJson<JsonValues>(_data);
+    }
 }
+//======================================

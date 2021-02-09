@@ -5,8 +5,6 @@ using UnityEngine;
 
 public class FabulaObject : ScriptableObject
 {
-
-    public Talk talkValue;
     // Start is called before the first frame update
     void Start()
     {
