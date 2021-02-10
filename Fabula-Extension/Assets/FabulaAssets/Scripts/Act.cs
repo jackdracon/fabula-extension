@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -20,29 +21,55 @@ public class Act : ScriptableObject, IAct
     [SerializeField]
     private TextAsset[] jsonAssets;
 
+    //Queue values to act narrative control without loss values.
+    private Queue<JsonValues> queuedAssets = new Queue<JsonValues>();
+
     //Get current value 
-    public Talk GetTalk(Act _act)
+    public JsonValues DequeueAsset()
     {
-        throw new System.NotImplementedException();
+        return queuedAssets.Dequeue();
     }
 
+    //load json assets and return the object
     private JsonValues LoadTalkAsset(TextAsset _data)
     {
         return JsonValues.CreateFromJSON(_data.text);
     }
 
-    //only test the json received values
-    public void Test()
+    public IEnumerator QueueActValues(Action _onCompleteActLoad)
     {
-         var _val = LoadTalkAsset(jsonAssets[0]);
-        Debug.Log("Asset - " +_val.Talk[1].Speaker);
+        uint indexAsset = 0;
+        while (indexAsset <= (jsonAssets.Length -1))
+        {
+            var _val = LoadTalkAsset(jsonAssets[indexAsset]);
+            AddAssetsOnQueue(_val);
+            indexAsset++;
+            yield return null;
+        }
+        _onCompleteActLoad();
+        //Debug.Log("Load Complete - " + queuedAssets.Count);
+    }
+
+    //only test the json received values
+    //public void Test()
+    //{
+    //     var _val = LoadTalkAsset(jsonAssets[0]);
+    //    Debug.Log("Asset - " +_val.Talk[1].Speaker);
+    //}
+
+    public void AddAssetsOnQueue(JsonValues _values)
+    {
+        queuedAssets.Enqueue(_values);
     }
 }
 
 //act interface
 public interface IAct
 {
+    JsonValues DequeueAsset();
 
-    Talk GetTalk(Act _act);
+    IEnumerator QueueActValues(Action _onCompleteActLoad);
+
+    void AddAssetsOnQueue(JsonValues _values);
 }
 
