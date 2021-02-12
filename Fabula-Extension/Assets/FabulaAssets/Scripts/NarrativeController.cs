@@ -5,7 +5,7 @@ using UnityEngine;
 /// <summary>
 /// O controlador de narrativa que lista os atos presentes no projeto
 /// </summary>
-public class NarrativeController : MonoBehaviour
+public class NarrativeController : Singleton<MonoBehaviour>
 {
     [SerializeField]
     private Act[] _actValues;
@@ -13,7 +13,7 @@ public class NarrativeController : MonoBehaviour
     [SerializeField, Tooltip("Index from act to play")]
     private uint actIndexToPlay = 0;
 
-    private static NarrativeController instance;
+    //private static NarrativeController instance;
 
     //Current active act on scene
     private Act currentAct;
@@ -21,10 +21,12 @@ public class NarrativeController : MonoBehaviour
     //Current talk
     private Talk[] currentTalk;
 
+    private uint talkIndex = 0;
+
     private void Awake()
     {
-        if (Instance) { Destroy(this);}
-        else { Instance = this; }
+        //if (Instance) { Destroy(this.gameObject);}
+        //Instance = this;
 
     }
     // Start is called before the first frame update
@@ -54,6 +56,7 @@ public class NarrativeController : MonoBehaviour
         {
             var _receivedValues = currentAct.DequeueAsset();
             currentTalk = _receivedValues.Talk;
+            Debug.Log("Talk by - " + currentTalk[0].Speaker);
         }
         else
         {
@@ -67,13 +70,13 @@ public class NarrativeController : MonoBehaviour
         
     }
 
-    //Narrative Instance object
-    public static NarrativeController Instance
+    public bool NextSpeak()
     {
-        get { return instance; }
-        private set { instance = value; }
+        talkIndex++;
+        if (talkIndex >= currentTalk.Length)
+            return false;
+        return true;
     }
-
 
     //Get all the act's collection registered on +actValues
     public Act[] GetActCollection
