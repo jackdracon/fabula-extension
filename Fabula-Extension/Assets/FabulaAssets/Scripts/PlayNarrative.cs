@@ -2,32 +2,64 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(NarrativeController))]
+/// <summary>
+/// [ENG]
+/// PlayNarrative is related to control the narrative actions
+/// 
+/// [PTBR]
+/// 
+/// </summary>
 public class PlayNarrative : Singleton<MonoBehaviour>
 {
-    private static NarrativeController narrative_Controller;
+    //narrative instance on gameobject related to the narrative object
+    private NarrativeController narrative_Controller;
 
+    //Current PlayNarrative status
     public static PlayNarrativeStatus narrativeStatus = PlayNarrativeStatus.AVAILABLE;
-
 
     private void Start()
     {
-        narrative_Controller = GetComponent<NarrativeController>();
-        if (narrative_Controller)
-            Debug.Log("Narrative found");
+        SetNarrativeController();
     }
 
-    private void OnLoadNarrative() { }
+    public void SetNarrativeController()
+    {
+        narrative_Controller = GetComponent<NarrativeController>();
+        if (narrative_Controller)
+        {
+            narrativeStatus = PlayNarrativeStatus.AVAILABLE;
+            Debug.Log("Narrative found");
+            OnLoadNarrative();
+        }
+    }
 
-    private void OnPlayNarrative() { }
 
-    private void OnStopNarrative() { }
+    public virtual void OnLoadNarrative()
+    {
+        if (narrative_Controller)
+        {
+            narrative_Controller.LoadAct();
+            narrativeStatus = PlayNarrativeStatus.LOADED;
+        }
+        else
+        {
+            narrativeStatus = PlayNarrativeStatus.ERROR_ON_LOAD;
+        }
+    }
 
-    private void OnErrorToLoad() { }
+    //Call it to play the narrative by input
+    public virtual void OnPlayNarrative()
+    {
+        if (narrative_Controller)
+        {
+            var talkInfo = narrative_Controller.NextTalk();
+            Debug.Log("<color=yellow>Talk - " + talkInfo.Speaker + " @ " + talkInfo.Speak + "</color>");
+        }
+    }
 
+    public virtual void OnStopNarrative() { }
 
-
-
+    public virtual void OnErrorToLoad() { }
 }
 
 //Status related to the narrative disposable to show.

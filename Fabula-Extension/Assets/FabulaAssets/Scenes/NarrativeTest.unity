@@ -214,6 +214,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1683684995}
   - component: {fileID: 1683684994}
+  - component: {fileID: 1683684996}
   m_Layer: 0
   m_Name: NarrativeController
   m_TagString: Untagged
@@ -235,6 +236,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _actValues:
   - {fileID: 11400000, guid: a1159da3b247f4e4a88f63bedbed7baa, type: 2}
+  actIndexToPlay: 0
 --- !u!4 &1683684995
 Transform:
   m_ObjectHideFlags: 0
@@ -249,3 +251,15 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1683684996
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1683684993}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2c85e1e40a5bf429bbeb8d3340c27951, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

@@ -3,7 +3,15 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// O controlador de narrativa que lista os atos presentes no projeto
+/// [ENG]
+/// NarrativeController is used to control the loading values from Act object
+/// as call it, listed on _actValues. Also is possible to get the talk values
+/// (object with the talk infos).
+///
+/// [PTBR]
+/// NarrativeController é utilizado no controle the carregamento dos
+/// valores do Ato listado no _actValues. Também é possível retornar o
+/// valor de Talk (objeto que contém valores de conversa)
 /// </summary>
 public class NarrativeController : Singleton<MonoBehaviour>
 {
@@ -21,18 +29,22 @@ public class NarrativeController : Singleton<MonoBehaviour>
     //Current talk
     private Talk[] currentTalk;
 
+    //Current talk index
     private uint talkIndex = 0;
 
-    private void Awake()
+    //Load Act to be active on the scene (if isn't)
+    public void LoadAct(int _actIndex = 0)
     {
-        //if (Instance) { Destroy(this.gameObject);}
-        //Instance = this;
-
-    }
-    // Start is called before the first frame update
-    void Start()
-    {
-        LoadAct(_actValues[actIndexToPlay]);
+        Act _act = _actValues[_actIndex];
+        if (_act)
+        {
+            this.currentAct = _act;
+            //load the talk values than assigned that to the currentAct field
+            StartCoroutine(currentAct.QueueActValues(
+                            () => {
+                                SetCurrentTalkValues();
+                            }));
+        }
     }
 
     //Load Act to be active on the scene (if isn't)
@@ -40,17 +52,18 @@ public class NarrativeController : Singleton<MonoBehaviour>
     {
         if (_toLoad)
         {
+            currentAct = _toLoad;
             //load the talk values than assigned that to the currentAct field
-            StartCoroutine(_toLoad.QueueActValues(
+            StartCoroutine(currentAct.QueueActValues(
                             () => {
-                                this.currentAct = _toLoad;
-                                ChargeCurrentTalkValues();
+                                SetCurrentTalkValues();
                                 }));
         }
     }
 
-    //Return the value if it's not null
-    public void ChargeCurrentTalkValues()
+    //Return the value if it's not null (Debug)
+    [ContextMenu("Debug Act Values")]
+    private void SetCurrentTalkValues()
     {
         if (currentAct)
         {
@@ -65,22 +78,31 @@ public class NarrativeController : Singleton<MonoBehaviour>
     }
 
     //Current talk values to be charged and disposable to be view.
-    public void TalkProgress()
+    public Talk NextTalk()
     {
-        
-    }
+        Talk _nextTalk = null;
 
-    public bool NextSpeak()
-    {
         talkIndex++;
-        if (talkIndex >= currentTalk.Length)
-            return false;
-        return true;
+        if (talkIndex < currentTalk.Length)
+        {
+            _nextTalk = currentTalk[talkIndex];
+        }
+        return _nextTalk;
     }
 
-    //Get all the act's collection registered on +actValues
-    public Act[] GetActCollection
+    //Get all the talk values from currentAct
+    public Talk[] GetCompleteTalkOnAct
     {
-        get { return _actValues; }
+        get { return currentTalk; }
+    }
+
+    //Clean object from memory when destroyed.
+    private void OnDestroy()
+    {
+        currentAct = null;
+        currentTalk = null;
+        _actValues = null;
+
+        talkIndex = 0;
     }
 }
