@@ -43,21 +43,23 @@ public class NarrativeController : Singleton<MonoBehaviour>
             StartCoroutine(currentAct.QueueActValues(
                             () => {
                                 SetCurrentTalkValues();
+                                Debug.Log(" AMOUNT " + currentAct.QueueLength);
                             }));
         }
     }
 
     //Load Act to be active on the scene (if isn't)
-    public void LoadAct(Act _toLoad)
+    public void LoadAct(Act _act)
     {
-        if (_toLoad)
+        if (_act)
         {
-            currentAct = _toLoad;
+            currentAct = _act;
             //load the talk values than assigned that to the currentAct field
             StartCoroutine(currentAct.QueueActValues(
                             () => {
                                 SetCurrentTalkValues();
-                                }));
+                                Debug.Log(" AMOUNT " + currentAct.QueueLength);
+                            }));
         }
     }
 
@@ -65,16 +67,18 @@ public class NarrativeController : Singleton<MonoBehaviour>
     [ContextMenu("Debug Act Values")]
     private void SetCurrentTalkValues()
     {
+        Debug.Log(" TALK AMOUNT " + currentAct.QueueLength);
         if (currentAct)
         {
             var _receivedValues = currentAct.DequeueAsset();
             currentTalk = _receivedValues.Talk;
-            Debug.Log("Talk by - " + currentTalk[0].Speaker);
+            //Debug.Log("Talk by - " + currentTalk[0].Speaker);
         }
         else
         {
             Debug.Log("Act Null");
         }
+        Debug.Log("After get Talk - " + currentAct.QueueLength);
     }
 
     //Current talk values to be charged and disposable to be view.
@@ -82,11 +86,11 @@ public class NarrativeController : Singleton<MonoBehaviour>
     {
         Talk _nextTalk = null;
 
-        talkIndex++;
         if (talkIndex < currentTalk.Length)
         {
             _nextTalk = currentTalk[talkIndex];
         }
+        talkIndex++;
         return _nextTalk;
     }
 

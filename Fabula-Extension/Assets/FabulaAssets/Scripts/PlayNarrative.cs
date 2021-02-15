@@ -33,7 +33,7 @@ public class PlayNarrative : Singleton<MonoBehaviour>
         }
     }
 
-
+    //Called to load
     public virtual void OnLoadNarrative()
     {
         if (narrative_Controller)
@@ -52,14 +52,29 @@ public class PlayNarrative : Singleton<MonoBehaviour>
     {
         if (narrative_Controller)
         {
+            narrativeStatus = PlayNarrativeStatus.READY_TO_PLAY;
             var talkInfo = narrative_Controller.NextTalk();
             Debug.Log("<color=yellow>Talk - " + talkInfo.Speaker + " @ " + talkInfo.Speak + "</color>");
         }
     }
 
-    public virtual void OnStopNarrative() { }
+    //Call it to stop narrative
+    public virtual void OnStopNarrative()
+    {
+        if (narrative_Controller)
+        {
+            narrativeStatus = PlayNarrativeStatus.STOP;
+        }
+    }
 
-    public virtual void OnErrorToLoad() { }
+    //Call to when has some error
+    public virtual void OnErrorToLoad()
+    {
+        if (narrative_Controller)
+        {
+            narrativeStatus = PlayNarrativeStatus.ERROR_ON_LOAD;
+        }
+    }
 }
 
 //Status related to the narrative disposable to show.

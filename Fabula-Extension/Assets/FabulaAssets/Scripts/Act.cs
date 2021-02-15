@@ -36,6 +36,7 @@ public class Act : ScriptableObject, IAct
         return JsonValues.CreateFromJSON(_data.text);
     }
 
+    //Serialize the datas from json values and add to the assets queue object
     public IEnumerator QueueActValues(Action _onCompleteActLoad)
     {
         uint indexAsset = 0;
@@ -47,19 +48,18 @@ public class Act : ScriptableObject, IAct
             yield return null;
         }
         _onCompleteActLoad();
-        //Debug.Log("Load Complete - " + queuedAssets.Count);
     }
 
-    //only test the json received values
-    //public void Test()
-    //{
-    //     var _val = LoadTalkAsset(jsonAssets[0]);
-    //    Debug.Log("Asset - " +_val.Talk[1].Speaker);
-    //}
-
+    //Add Assets on queued object to guarantee the assets integrity
     public void AddAssetsOnQueue(JsonValues _values)
     {
         queuedAssets.Enqueue(_values);
+    }
+
+    //Return the queue's size
+    public int QueueLength
+    {
+        get { return queuedAssets.Count; }
     }
 }
 
