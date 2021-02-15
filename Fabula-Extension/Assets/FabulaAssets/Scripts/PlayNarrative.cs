@@ -34,11 +34,11 @@ public class PlayNarrative : Singleton<MonoBehaviour>
     }
 
     //Called to load
-    public virtual void OnLoadNarrative()
+    public virtual void OnLoadNarrative(int _actIndex = 0)
     {
         if (narrative_Controller)
         {
-            narrative_Controller.LoadAct();
+            narrative_Controller.LoadAct(_actIndex);
             narrativeStatus = PlayNarrativeStatus.LOADED;
         }
         else
@@ -52,9 +52,15 @@ public class PlayNarrative : Singleton<MonoBehaviour>
     {
         if (narrative_Controller)
         {
-            narrativeStatus = PlayNarrativeStatus.READY_TO_PLAY;
+            narrativeStatus = PlayNarrativeStatus.PLAYING;
             var talkInfo = narrative_Controller.NextTalk();
-            Debug.Log("<color=yellow>Talk - " + talkInfo.Speaker + " @ " + talkInfo.Speak + "</color>");
+            if (talkInfo != null)
+                Debug.Log("<color=yellow>Talk - " + talkInfo.Speaker + " @ " + talkInfo.Speak + "</color>");
+            else
+            {
+                narrativeStatus = PlayNarrativeStatus.STOP;
+                Debug.Log("<color=red>Talk - END CURRENT TALK</color>");
+            }
         }
     }
 
@@ -70,9 +76,22 @@ public class PlayNarrative : Singleton<MonoBehaviour>
     //Call to when has some error
     public virtual void OnErrorToLoad()
     {
+
         if (narrative_Controller)
         {
             narrativeStatus = PlayNarrativeStatus.ERROR_ON_LOAD;
+        }
+    }
+
+    private void Update()
+    {
+        if (narrativeStatus == PlayNarrativeStatus.LOADED ||
+            narrativeStatus == PlayNarrativeStatus.PLAYING)
+        {
+            if (Input.GetKeyUp(KeyCode.Space))
+            {
+                OnPlayNarrative();
+            }
         }
     }
 }
@@ -82,7 +101,7 @@ public enum PlayNarrativeStatus
 {
     AVAILABLE = 0,
     LOADED = 1,
-    READY_TO_PLAY = 2,
+    PLAYING = 2,
     STOP = 3,
     ERROR_ON_LOAD = 4
 }
