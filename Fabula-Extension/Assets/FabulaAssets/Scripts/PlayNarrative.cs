@@ -17,7 +17,7 @@ public class PlayNarrative : Singleton<MonoBehaviour>
     //Current PlayNarrative status
     public static NarrativeStatus narrativeStatus = NarrativeStatus.AVAILABLE;
 
-
+    //Input Reader component
     private InputReader inputReader;
 
     private void Start()
@@ -35,7 +35,7 @@ public class PlayNarrative : Singleton<MonoBehaviour>
         {
             narrativeStatus = NarrativeStatus.AVAILABLE;
             Debug.Log("Narrative found");
-            OnLoadNarrative();
+            //OnLoadNarrative();
         }
     }
 
@@ -92,28 +92,33 @@ public class PlayNarrative : Singleton<MonoBehaviour>
     private void Update()
     {
         TickInput();
-
-        //if (narrativeStatus == PlayNarrativeStatus.LOADED ||
-        //    narrativeStatus == PlayNarrativeStatus.PLAYING)
-        //{
-        //    if (Input.GetKeyUp(KeyCode.Space))
-        //    {
-        //        OnPlayNarrative();
-        //    }
-        //}
     }
 
+    //Input Monitor every update
     public virtual void TickInput()
     {
         if (inputReader != null)
         {
-            if (inputReader.EnableAct()) { Debug.Log("ACT ENABLED"); }
+            if (inputReader.EnableAct()) {
+                Debug.Log("ACT ENABLED");
+            }
 
-            if (inputReader.LoadNextAct()) { Debug.Log("LOAD ACT"); }
+            if (inputReader.LoadNextAct())
+            {
+                Debug.Log("LOAD ACT");
+                OnLoadNarrative();
+            }
 
-            if (inputReader.JumpToNextAct()) { Debug.Log("JUMP TO NEXT ACT"); }
+            if (inputReader.JumpToNextAct())
+            {
+                Debug.Log("JUMP TO NEXT ACT");
+            }
 
-            if (inputReader.NextTalk()) { Debug.Log("NEXT TALK ON ACT"); }
+            if (inputReader.NextTalk())
+            {
+                Debug.Log("NEXT TALK ON ACT");
+                OnPlayNarrative();
+            }
         }
     }
 }

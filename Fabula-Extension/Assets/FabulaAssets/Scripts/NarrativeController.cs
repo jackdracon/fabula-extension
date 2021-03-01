@@ -108,5 +108,8 @@ public class NarrativeController : Singleton<MonoBehaviour>
         _actValues = null;
 
         talkIndex = 0;
+
+        //preserve the object
+        DontDestroyOnLoad(this);
     }
 }
