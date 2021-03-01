@@ -15,11 +15,17 @@ public class PlayNarrative : Singleton<MonoBehaviour>
     private NarrativeController narrative_Controller;
 
     //Current PlayNarrative status
-    public static PlayNarrativeStatus narrativeStatus = PlayNarrativeStatus.AVAILABLE;
+    public static NarrativeStatus narrativeStatus = NarrativeStatus.AVAILABLE;
+
+
+    private InputReader inputReader;
 
     private void Start()
     {
         SetNarrativeController();
+        inputReader = GetComponent<InputReader>();
+        if (inputReader == null)
+            Debug.LogError("INPUT READER NOT FOUND ON OBJECT");
     }
 
     public void SetNarrativeController()
@@ -27,7 +33,7 @@ public class PlayNarrative : Singleton<MonoBehaviour>
         narrative_Controller = GetComponent<NarrativeController>();
         if (narrative_Controller)
         {
-            narrativeStatus = PlayNarrativeStatus.AVAILABLE;
+            narrativeStatus = NarrativeStatus.AVAILABLE;
             Debug.Log("Narrative found");
             OnLoadNarrative();
         }
@@ -39,11 +45,11 @@ public class PlayNarrative : Singleton<MonoBehaviour>
         if (narrative_Controller)
         {
             narrative_Controller.LoadAct(_actIndex);
-            narrativeStatus = PlayNarrativeStatus.LOADED;
+            narrativeStatus = NarrativeStatus.LOADED;
         }
         else
         {
-            narrativeStatus = PlayNarrativeStatus.ERROR_ON_LOAD;
+            narrativeStatus = NarrativeStatus.ERROR_ON_LOAD;
         }
     }
 
@@ -52,13 +58,13 @@ public class PlayNarrative : Singleton<MonoBehaviour>
     {
         if (narrative_Controller)
         {
-            narrativeStatus = PlayNarrativeStatus.PLAYING;
+            narrativeStatus = NarrativeStatus.PLAYING;
             var talkInfo = narrative_Controller.NextTalk();
             if (talkInfo != null)
                 Debug.Log("<color=yellow>Talk - " + talkInfo.Speaker + " @ " + talkInfo.Speak + "</color>");
             else
             {
-                narrativeStatus = PlayNarrativeStatus.STOP;
+                narrativeStatus = NarrativeStatus.STOP;
                 Debug.Log("<color=red>Talk - END CURRENT TALK</color>");
             }
         }
@@ -69,7 +75,7 @@ public class PlayNarrative : Singleton<MonoBehaviour>
     {
         if (narrative_Controller)
         {
-            narrativeStatus = PlayNarrativeStatus.STOP;
+            narrativeStatus = NarrativeStatus.STOP;
         }
     }
 
@@ -79,25 +85,41 @@ public class PlayNarrative : Singleton<MonoBehaviour>
 
         if (narrative_Controller)
         {
-            narrativeStatus = PlayNarrativeStatus.ERROR_ON_LOAD;
+            narrativeStatus = NarrativeStatus.ERROR_ON_LOAD;
         }
     }
 
     private void Update()
     {
-        if (narrativeStatus == PlayNarrativeStatus.LOADED ||
-            narrativeStatus == PlayNarrativeStatus.PLAYING)
+        TickInput();
+
+        //if (narrativeStatus == PlayNarrativeStatus.LOADED ||
+        //    narrativeStatus == PlayNarrativeStatus.PLAYING)
+        //{
+        //    if (Input.GetKeyUp(KeyCode.Space))
+        //    {
+        //        OnPlayNarrative();
+        //    }
+        //}
+    }
+
+    public virtual void TickInput()
+    {
+        if (inputReader != null)
         {
-            if (Input.GetKeyUp(KeyCode.Space))
-            {
-                OnPlayNarrative();
-            }
+            if (inputReader.EnableAct()) { Debug.Log("ACT ENABLED"); }
+
+            if (inputReader.LoadNextAct()) { Debug.Log("LOAD ACT"); }
+
+            if (inputReader.JumpToNextAct()) { Debug.Log("JUMP TO NEXT ACT"); }
+
+            if (inputReader.NextTalk()) { Debug.Log("NEXT TALK ON ACT"); }
         }
     }
 }
 
 //Status related to the narrative disposable to show.
-public enum PlayNarrativeStatus
+public enum NarrativeStatus
 {
     AVAILABLE = 0,
     LOADED = 1,
@@ -106,31 +128,3 @@ public enum PlayNarrativeStatus
     ERROR_ON_LOAD = 4
 }
 
-//A Singleton design pattern to be prevent a duplicates
-public abstract class Singleton<T> : MonoBehaviour where T : MonoBehaviour
-{
-    private static T _instance;
-
-    public static T Instance
-    {
-        get
-        {
-            if (_instance == null)
-            {
-                _instance = GameObject.FindObjectOfType<T>();
-                if(_instance == null)
-                {
-                    _instance = new GameObject("Instance of " + typeof(T)).AddComponent<T>();
-                }
-            }
-
-            return _instance;
-        }
-    }
-
-    private void Awake()
-    {
-        if (_instance != null)
-            Destroy(this.gameObject); //prevent duplicates
-    }
-}

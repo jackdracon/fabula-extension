@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 3376155057205364719}
   - component: {fileID: 3376155057205364718}
   - component: {fileID: 3376155057205364712}
+  - component: {fileID: 4532097556864859826}
   m_Layer: 0
   m_Name: NarrativeController
   m_TagString: Untagged
@@ -59,3 +60,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2c85e1e40a5bf429bbeb8d3340c27951, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &4532097556864859826
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3376155057205364717}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 17db59af44f4342cda16fa4e242417f4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  goToNextTalk: 101
+  nextAct: 32
+  loadAct: 108
+  enableNarrative: 97
