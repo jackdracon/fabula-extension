@@ -4,112 +4,136 @@ using UnityEngine;
 
 /// <summary>
 /// [ENG]
-/// NarrativeController is used to control the loading values from Act object
-/// as call it, listed on _actValues. Also is possible to get the talk values
-/// (object with the talk infos).
-///
+/// PlayNarrative is related to control the narrative actions
+/// 
 /// [PTBR]
-/// NarrativeController é utilizado no controle the carregamento dos
-/// valores do Ato listado no _actValues. Também é possível retornar o
-/// valor de Talk (objeto que contém valores de conversa)
+/// 
 /// </summary>
 public class NarrativeController : Singleton<MonoBehaviour>
 {
-    [SerializeField]
-    private Act[] _actValues;
+    //narrative instance on gameobject related to the narrative object
+    private NarrativeManager narrative_Controller;
 
-    [SerializeField, Tooltip("Index from act to play")]
-    private uint actIndexToPlay = 0;
+    //Current PlayNarrative status
+    public static NarrativeStatus narrativeStatus = NarrativeStatus.AVAILABLE;
 
-    //private static NarrativeController instance;
+    //Input Reader component
+    private InputReader inputReader;
 
-    //Current active act on scene
-    private Act currentAct;
-
-    //Current talk
-    private Talk[] currentTalk;
-
-    //Current talk index
-    private uint talkIndex = 0;
-
-    //Load Act to be active on the scene (if isn't)
-    public void LoadAct(int _actIndex = 0)
+    private void Start()
     {
-        Act _act = _actValues[_actIndex];
-        if (_act)
+        SetNarrativeController();
+        inputReader = GetComponent<InputReader>();
+        if (inputReader == null)
+            Debug.LogError("INPUT READER NOT FOUND ON OBJECT");
+    }
+
+    public void SetNarrativeController()
+    {
+        narrative_Controller = GetComponent<NarrativeManager>();
+        if (narrative_Controller)
         {
-            this.currentAct = _act;
-            //load the talk values than assigned that to the currentAct field
-            StartCoroutine(currentAct.QueueActValues(
-                            () => {
-                                SetCurrentTalkValues();
-                                Debug.Log(" AMOUNT " + currentAct.QueueLength);
-                            }));
+            narrativeStatus = NarrativeStatus.AVAILABLE;
+            Debug.Log("Narrative found");
         }
     }
 
-    //Load Act to be active on the scene (if isn't)
-    public void LoadAct(Act _act)
+    //Called to load
+    public virtual void OnLoadNarrative(int _actIndex = 0)
     {
-        if (_act)
+        if (narrative_Controller)
         {
-            currentAct = _act;
-            //load the talk values than assigned that to the currentAct field
-            StartCoroutine(currentAct.QueueActValues(
-                            () => {
-                                SetCurrentTalkValues();
-                                Debug.Log(" AMOUNT " + currentAct.QueueLength);
-                            }));
-        }
-    }
+            narrative_Controller.enabled = true;
 
-    //Return the value if it's not null (Debug)
-    [ContextMenu("Debug Act Values")]
-    private void SetCurrentTalkValues()
-    {
-        Debug.Log(" TALK AMOUNT " + currentAct.QueueLength);
-        if (currentAct)
-        {
-            var _receivedValues = currentAct.DequeueAsset();
-            currentTalk = _receivedValues.Talk;
-            //Debug.Log("Talk by - " + currentTalk[0].Speaker);
+            narrative_Controller.LoadAct(_actIndex);
+            narrativeStatus = NarrativeStatus.LOADED;
         }
         else
         {
-            Debug.Log("Act Null");
+            narrativeStatus = NarrativeStatus.ERROR_ON_LOAD;
         }
-        Debug.Log("After get Talk - " + currentAct.QueueLength);
     }
 
-    //Current talk values to be charged and disposable to be view.
-    public Talk NextTalk()
+    //Call it to play the narrative by input
+    public virtual void OnPlayNarrative()
     {
-        Talk _nextTalk = null;
-
-        if (talkIndex < currentTalk.Length)
+        if (narrative_Controller)
         {
-            _nextTalk = currentTalk[talkIndex];
+            narrativeStatus = NarrativeStatus.PLAYING;
+            var talkInfo = narrative_Controller.NextTalk();
+            if (talkInfo != null)
+                Debug.Log("<color=yellow>Talk - " + talkInfo.Speaker + " @ " + talkInfo.Speak + "</color>");
+            else
+            {
+                narrativeStatus = NarrativeStatus.STOP;
+                Debug.Log("<color=red>Talk - END CURRENT TALK</color>");
+            }
         }
-        talkIndex++;
-        return _nextTalk;
     }
 
-    //Get all the talk values from currentAct
-    public Talk[] GetCompleteTalkOnAct
+    //Call it to stop narrative
+    public virtual void OnStopNarrative()
     {
-        get { return currentTalk; }
+        if (narrative_Controller)
+        {
+            narrativeStatus = NarrativeStatus.STOP;
+
+            narrative_Controller.enabled = false;
+        }
     }
 
-    //Clean object from memory when destroyed.
-    private void OnDestroy()
+    //Call to when has some error
+    public virtual void OnErrorToLoad()
     {
-        currentAct = null;
-        currentTalk = null;
-        _actValues = null;
 
-        talkIndex = 0;
+        if (narrative_Controller == null)
+        {
+            narrativeStatus = NarrativeStatus.ERROR_ON_LOAD;
+        }
+    }
 
-        //preserve the object
-        DontDestroyOnLoad(this);
+    private void Update()
+    {
+        TickInput();
+    }
+
+    //Input Monitor every update
+    public virtual void TickInput()
+    {
+        if (inputReader != null)
+        {
+            if (inputReader.EnableAct()) {
+                Debug.Log("ACT ENABLED");
+                narrative_Controller.enabled = true;
+            }
+
+            if (inputReader.LoadNextAct())
+            {
+                Debug.Log("LOAD ACT");
+                OnLoadNarrative();
+            }
+
+            if (inputReader.JumpToNextAct())
+            {
+                Debug.Log("JUMP TO NEXT ACT");
+            }
+
+            if (inputReader.NextTalk())
+            {
+                Debug.Log("NEXT TALK ON ACT");
+                OnPlayNarrative();
+            }
+        }
     }
 }
+
+//Status related to the narrative disposable to show.
+public enum NarrativeStatus
+{
+    AVAILABLE = 0,
+    LOADED = 1,
+    PLAYING = 2,
+    STOP = 3,
+    ERROR_ON_LOAD = 4
+}
+

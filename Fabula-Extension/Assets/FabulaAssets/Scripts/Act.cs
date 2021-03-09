@@ -16,6 +16,8 @@ using UnityEngine;
 [CreateAssetMenu(menuName ="Act Object")]
 public class Act : ScriptableObject, IAct
 {
+    ///a action that is called when the QueueActValues async method finish.
+    public event Action OnCompleteLoad;
 
     //json data talk values
     [SerializeField]
